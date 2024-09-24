@@ -1,0 +1,96 @@
+body {
+  margin: 0;
+  background: rgb(238, 208, 255);
+  height: 100vh;
+}
+
+#container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+#center {
+  width: 100%;
+  margin: 2vw;
+}
+
+textarea, select, button, body {
+  font-size: 3vw;
+  font-family: monospace;
+
+}
+
+section {
+  margin-bottom: 1em;
+}
+
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+textarea::placeholder {
+  color: rgb(219, 167, 250);
+}
+
+
+textarea, select, button {
+  background: none;
+  border: 0.15vw solid black;
+  padding: 2vw;
+  border-radius: 0;
+  outline: none;
+}
+
+select, button {
+  cursor: pointer;
+}
+
+select:hover, button:hover {
+  background:  rgb(215, 153, 250);
+  color: white;
+}
+
+h1 {
+  font-weight: normal;
+  font-size: 1.5vw;
+  text-transform: uppercase;
+  text-align: left;
+  overflow: hidden;
+  width: 150%;
+  height: 1.5vw;
+  color: rgb(219, 167, 250);
+}
+
+#lang {
+  margin-bottom: 2.5vw;
+}
+
+#send {
+  margin-top: 2vw;
+}
+
+
+#write {
+  text-align: center;
+  font-size: 9vw;
+}
+
+header, footer {
+  display: none;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+header {
+  top: 0;
+}
+
+footer {
+  bottom: 0;
+}

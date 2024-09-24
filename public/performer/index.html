@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LAUREN</title>
+    <link rel="shortcut icon" type="image/jpg" href="../favicon.ico"/>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script  src="/__/firebase/9.17.1/firebase-app-compat.js"></script>
+    <script  src="/__/firebase/9.17.1/firebase-auth-compat.js"></script>
+    <script  src="/__/firebase/9.17.1/firebase-firestore-compat.js"></script>
+    <script  src="/__/firebase/9.17.1/firebase-storage-compat.js"></script>
+    <script  src="/__/firebase/9.17.1/firebase-performance-compat.js"></script>
+    <script  src="/__/firebase/init.js?useEmulator=true"></script>
+    <link rel="stylesheet" href="../style.css">
+
+  </head>
+  <body>
+    <header>
+      <h1>&nbsp;LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home?</h1>
+    </header>
+
+    <div id="container">
+      <div id="center">
+          
+        Language:
+        <select id="lang" name="lang">
+          <option value="en" selected>English</option>
+          <option value="de">Deutsch</option>
+        </select>
+        <textarea type="text" id="msg" placeholder="Type to speak..." rows="3"></textarea>
+
+        <button id="send">Send</button>
+    
+    
+        <footer>
+          <h1>&nbsp;LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home?</h1>
+        </footer>
+      </div>
+    </div>
+   
+
+    <script>
+      const app = firebase.app();
+      firebase.auth().signInAnonymously().catch(error => { console.log(error); });
+      firebase.auth().onAuthStateChanged(user => { 
+        init();
+      });
+      const db = firebase.firestore(app);
+
+      function init() {
+        $('#send').click(send);
+
+      }
+
+      function send() {
+        let msg = $('#msg').val();
+        console.log(`send ${msg}`);
+        db.collection('messages').add({text: msg, lang: $('#lang').find(":selected").val(), ts: firebase.firestore.FieldValue.serverTimestamp(), ms: new Date().getTime()}).then(() => {});
+        $('#msg').val("");
+      }
+    </script>
+  </body>
+</html>

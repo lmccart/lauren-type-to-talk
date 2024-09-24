@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LAUREN</title>
+    <link rel="shortcut icon" type="image/jpg" href="../favicon.ico"/>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script  src="/__/firebase/9.17.1/firebase-app-compat.js"></script>
+    <script  src="/__/firebase/9.17.1/firebase-auth-compat.js"></script>
+    <script  src="/__/firebase/9.17.1/firebase-firestore-compat.js"></script>
+    <script  src="/__/firebase/9.17.1/firebase-storage-compat.js"></script>
+    <script  src="/__/firebase/9.17.1/firebase-performance-compat.js"></script>
+    <script  src="/__/firebase/init.js?useEmulator=true"></script>
+    <link rel="stylesheet" href="../style.css">
+
+  </head>
+  <body>
+
+    <body>
+  
+      <div id="container">
+        <div id="center" style="text-align: center;">
+          <div id="write" style="display:none"></div>
+          <button id="start">start</button>
+        </div>
+      </div>
+
+
+    <script>
+
+      let selectedVoices = { 'en': null, 'de': null};
+
+      window.speechSynthesis.onvoiceschanged = function() {
+        let voiceOptions = {
+          'en': ['Vicki', 'Samantha', 'Allison', 'Ava'],
+          'de': ['Anna']
+        };
+        let voices = window.speechSynthesis.getVoices();
+        console.log('voice');
+        for (let v in voices) {
+          if (voiceOptions['en'].indexOf(voices[v].voiceURI) !== -1) {
+            selectedVoices['en'] = voices[v];
+          }
+          if (voiceOptions['de'].indexOf(voices[v].voiceURI) !== -1 || voices[v].lang === 'de-DE') {
+            selectedVoices['de'] = voices[v];
+          }
+        }
+
+        console.log(voices)
+        console.log(selectedVoices)
+      };
+
+
+
+      const app = firebase.app();
+      firebase.auth().signInAnonymously().catch(error => { console.log(error); });
+      firebase.auth().onAuthStateChanged(user => { });
+      const db = firebase.firestore(app);
+      db.collection('messages').onSnapshot(function(snapshot) {
+
+        snapshot.docChanges().forEach(function(change) {
+          console.log('change');
+          let now = new Date().getTime();
+          if (change.type === 'added' && now - change.doc.data().ms < 5000) {
+            write(change.doc.data());
+            speak(change.doc.data());
+          }
+        });
+      });
+
+
+      function start() {
+        $('#start').hide();
+        speak('Hello', 0);
+        $('#write').show();
+      }
+
+      function write(data) {
+        console.log(data);
+        $('#write').html(data.text);
+      }
+
+
+      function speak(msg, vol) {
+        if (arguments.length === 1) {
+          vol = 1;
+        }
+        const utterance = new SpeechSynthesisUtterance(msg.text);
+        utterance.volume = vol;
+        // utterance.rate = 0.8;
+        if (selectedVoices[msg.lang]) utterance.voice = selectedVoices[msg.lang];
+        speechSynthesis.speak(utterance);
+      }
+
+
+      $('#start').click(start);
+    </script>
+  </body>
+</html>
