@@ -1,5 +1,4 @@
 ## Setup
-- `npm install`
 - `firebase serve`
 
 ## Endpoints:
