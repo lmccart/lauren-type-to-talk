@@ -57,8 +57,11 @@
       function send() {
         let msg = $('#msg').val();
         console.log(`send ${msg}`);
-        db.collection('messages').add({text: msg, lang: $('#lang').find(":selected").val(), ts: firebase.firestore.FieldValue.serverTimestamp(), ms: new Date().getTime()}).then(() => {});
-        $('#msg').val("");
+        if (msg && msg.length) {
+          db.collection('messages').add({text: msg, lang: $('#lang').find(":selected").val(), ts: firebase.firestore.FieldValue.serverTimestamp(), ms: new Date().getTime()}).then(() => {
+            $('#msg').val("");
+          });
+        }
       }
     </script>
   </body>
