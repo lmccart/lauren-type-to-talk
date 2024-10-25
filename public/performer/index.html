@@ -24,20 +24,29 @@
     <div id="container">
       <div id="center">
           
-        Language:
-        <select id="lang" name="lang">
-          <option value="en" selected>English</option>
-          <option value="de">Deutsch</option>
-        </select>
-        <textarea type="text" id="msg" placeholder="Type to speak..." rows="3"></textarea>
+        <div id="live-mode">
+          Language:
+          <select id="lang" name="lang">
+            <option value="en" selected>English</option>
+            <option value="de">Deutsch</option>
+          </select>
+          <textarea type="text" id="msg" placeholder="Type to speak..." rows="3"></textarea>
+  
+          <button id="send">Send</button>
+        </div>
 
-        <button id="send">Send</button>
-    
+        <div id="not-live-mode">
+          <p id="next-performance">The next performance will be soon!</p>
+        </div>
+
+        
     
         <footer>
           <h1>&nbsp;LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home?</h1>
         </footer>
       </div>
+      <button id="live">Live</button>
+      
     </div>
    
 
@@ -49,9 +58,26 @@
       });
       const db = firebase.firestore(app);
 
-      function init() {
-        $('#send').click(send);
+      // Check for Live mode
+      let isLive;
+      const statusDoc = db.collection('status').doc('lauren');
+      statusDoc.onSnapshot((doc) => {
+        isLive = doc.data().live;
+        checkUIForToggle();
+        console.log(`LAUREN is ${isLive ? 'live' : 'not live'}.`);
+      })
 
+      let dateWrittenEN, dateWrittenDE;
+      let nextLang = 'de';
+      let langInterval;
+      let langIntervalDelay = 10000;
+
+      function init() {
+        // Attach functionality to buttons
+        $('#send').click(send);
+        $('#live').click(toggleLive);
+
+        checkNextPeformance();
       }
 
       function send() {
@@ -63,6 +89,78 @@
           });
         }
       }
+
+      function toggleLive() {
+        statusDoc.get().then((doc) => {
+          isLive = doc.data().live;
+          statusDoc.update({
+            live: !isLive
+          }).then().catch((error) => {
+            console.error("Error updating document: ", error);
+          });
+        })
+      }
+
+      function checkUIForToggle() {
+        if (isLive) {
+          $('#live-mode').show();
+          $('#not-live-mode').hide();
+          $('#live').text("Live");
+          clearInterval(langInterval);
+        } else {
+          $('#live-mode').hide();
+          $('#not-live-mode').show();
+          $('#live').text("Not Live");
+          nextLang == 'de';
+          // switchPerformanceLang();
+          clearInterval(langInterval);
+          langInterval = setInterval(switchPerformanceLang, langIntervalDelay);
+        }
+      }
+
+      // function addPerformances() {
+      //   for (let performance of performances) {
+      //     let pDate = new Date(performance);
+      //     db.collection('performances').add({
+      //       dateWrittenEN: "",
+      //       dateWrittenDE: "",
+      //       dateUTC: firebase.firestore.Timestamp.fromDate(pDate)
+      //     });
+      //   }
+      // }
+
+      function checkNextPeformance() {
+        const now = new Date();
+        db.collection('performances')
+          .where('dateUTC', '>', firebase.firestore.Timestamp.fromDate(now))
+          .orderBy('dateUTC', 'asc')
+          .limit(1)
+          .get()
+          .then((querySnapshot) => {
+            if (!querySnapshot.empty) {
+              const nextPerformance = querySnapshot.docs[0].data();
+              console.log("Next Performance:", nextPerformance);
+              ({ dateWrittenEN, dateWrittenDE } = nextPerformance);
+              switchPerformanceLang();
+            } else {
+              console.log("No upcoming performances.");
+            }
+          }).catch((error) => {
+            console.error("Error fetching performances: ", error);
+          });
+      }
+
+      function switchPerformanceLang() {
+        console.log(`switching next performance language to ${nextLang}!`)
+        if (nextLang == 'en') {
+          $('#next-performance').text(dateWrittenEN);
+          nextLang = 'de';
+        } else {
+          $('#next-performance').text(dateWrittenDE);
+          nextLang = 'en';
+        }
+      }
+
     </script>
   </body>
 </html>

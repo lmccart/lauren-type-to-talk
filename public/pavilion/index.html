@@ -23,6 +23,9 @@
       <div id="container">
         <div id="center" style="text-align: center;">
           <div id="write" style="display:none"></div>
+          <div id="not-live-mode">
+            <div id="next-performance">The next performance will be soon!</div>
+          </div>
           <button id="start">start</button>
         </div>
       </div>
@@ -30,6 +33,7 @@
 
     <script>
 
+      // Speech synthesis
       let selectedVoices = { 'en': null, 'de': null};
 
       window.speechSynthesis.onvoiceschanged = function() {
@@ -52,8 +56,7 @@
         console.log(selectedVoices)
       };
 
-
-
+      // Firebase messages
       const app = firebase.app();
       firebase.auth().signInAnonymously().catch(error => { console.log(error); });
       firebase.auth().onAuthStateChanged(user => { });
@@ -70,6 +73,23 @@
         });
       });
 
+      // Firebase status
+      let isLive;
+      const statusDoc = db.collection('status').doc('lauren');
+      statusDoc.onSnapshot((doc) => {
+        isLive = doc.data().live;
+        checkUIForToggle();
+        console.log(`LAUREN is ${isLive ? 'live' : 'not live'}.`);
+      });
+
+      // Next performance date
+      let dateWrittenEN, dateWrittenDE;
+      let nextLang = 'de';
+      let langInterval;
+      let langIntervalDelay = 10000;
+      checkNextPeformance();
+
+      $('#start').click(start);
 
       function start() {
         $('#start').hide();
@@ -94,8 +114,55 @@
         speechSynthesis.speak(utterance);
       }
 
+      function checkUIForToggle() {
+        if (isLive) {
+          $('#start').show();
+          $('#not-live-mode').hide();
+          clearInterval(langInterval);
+          // $('body').css("background-color", "rgb(238, 208, 255)");
+        } else {
+          $('#write').hide();
+          $('#start').hide();
+          $('#not-live-mode').show();
+          nextLang == 'de';
+          // switchPerformanceLang();
+          clearInterval(langInterval);
+          langInterval = setInterval(switchPerformanceLang, langIntervalDelay);
+          // $('body').css("background-color", "black");
+        }
+      }
 
-      $('#start').click(start);
+      function checkNextPeformance() {
+        const now = new Date();
+        db.collection('performances')
+          .where('dateUTC', '>', firebase.firestore.Timestamp.fromDate(now))
+          .orderBy('dateUTC', 'asc')
+          .limit(1)
+          .get()
+          .then((querySnapshot) => {
+            if (!querySnapshot.empty) {
+              const nextPerformance = querySnapshot.docs[0].data();
+              console.log("Next Performance:", nextPerformance);
+              ({ dateWrittenEN, dateWrittenDE } = nextPerformance);
+              switchPerformanceLang();
+            } else {
+              console.log("No upcoming performances.");
+            }
+          }).catch((error) => {
+            console.error("Error fetching performances: ", error);
+          });
+      }
+
+      function switchPerformanceLang() {
+        console.log(`switching next performance language to ${nextLang}!`)
+        if (nextLang == 'en') {
+          $('#next-performance').text(dateWrittenEN);
+          nextLang = 'de';
+        } else {
+          $('#next-performance').text(dateWrittenDE);
+          nextLang = 'en';
+        }
+      }
     </script>
   </body>
 </html>
