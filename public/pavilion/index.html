@@ -87,7 +87,7 @@
       let nextLang = 'de';
       let langInterval;
       let langIntervalDelay = 10000;
-      checkNextPeformance();
+      checkNextPerformance();
 
       $('#start').click(start);
 
@@ -121,6 +121,7 @@
           clearInterval(langInterval);
           // $('body').css("background-color", "rgb(238, 208, 255)");
         } else {
+          checkNextPerformance();
           $('#write').hide();
           $('#start').hide();
           $('#not-live-mode').show();
@@ -132,7 +133,7 @@
         }
       }
 
-      function checkNextPeformance() {
+      function checkNextPerformance() {
         const now = new Date();
         db.collection('performances')
           .where('dateUTC', '>', firebase.firestore.Timestamp.fromDate(now))
