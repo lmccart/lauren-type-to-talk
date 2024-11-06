@@ -14,7 +14,7 @@
 
 body {
   margin: 0;
-  background: rgb(238, 208, 255);
+  background: rgb(223, 165, 255);
   height: 100vh;
   color: white;
 }
@@ -68,7 +68,7 @@ select, button {
 }
 
 select:hover, button:hover {
-  background:  rgb(215, 153, 250);
+  background:  rgb(211, 128, 255);
   color: white;
 }
 
