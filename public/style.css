@@ -48,7 +48,7 @@ textarea {
 
 
 textarea::placeholder {
-  color: rgba(219, 167, 250, 0.531);
+  color:  rgb(211, 128, 255);
 }
 
 
@@ -95,6 +95,10 @@ h1 {
   text-align: center;
   font-size: 7vw;
   text-transform: uppercase;
+}
+
+#max-char-count {
+  float: right;
 }
 
 #live {

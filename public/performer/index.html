@@ -31,6 +31,10 @@
             <option value="de">Deutsch</option>
           </select>
           <textarea type="text" id="msg" placeholder="Type to speak..." rows="3" maxlength="75"></textarea>
+          <div id="max-char-count">
+            <span id="current">0</span>
+            <span id="maximum">/ 75</span>
+          </div>
   
           <button id="send">Send</button>
         </div>
@@ -71,6 +75,11 @@
       let nextLang = 'de';
       let langInterval;
       let langIntervalDelay = 10000;
+
+      $('textarea').keyup(function() {
+        var characterCount = $(this).val().length;
+        $('#current').text(characterCount);
+      });
 
       function init() {
         // Attach functionality to buttons
