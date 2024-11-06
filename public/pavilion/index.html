@@ -33,137 +33,137 @@
 
     <script>
 
-      // Speech synthesis
-      let selectedVoices = { 'en': null, 'de': null};
+// Speech synthesis
+let selectedVoices = { 'en': null, 'de': null};
+let voices;
 
-      window.speechSynthesis.onvoiceschanged = function() {
-        let voiceOptions = {
-          'en': ['Vicki', 'Samantha', 'Allison', 'Ava'],
-          'de': ['Anna']
-        };
-        let voices = window.speechSynthesis.getVoices();
-        console.log('voice');
-        for (let v in voices) {
-          if (voiceOptions['en'].indexOf(voices[v].voiceURI) !== -1) {
-            selectedVoices['en'] = voices[v];
-          }
-          if (voiceOptions['de'].indexOf(voices[v].voiceURI) !== -1 || voices[v].lang === 'de-DE') {
-            selectedVoices['de'] = voices[v];
-          }
-        }
+window.speechSynthesis.onvoiceschanged = function() {
+  let voiceOptions = {
+    'en': ['Vicki', 'Samantha', 'Allison', 'Ava'],
+    'de': ['Anna']
+  };
+  voices = window.speechSynthesis.getVoices();
+  for (let v in voices) {
+    if (voiceOptions['en'].indexOf(voices[v].voiceURI) !== -1) {
+      selectedVoices['en'] = v;
+    }
+    if (voiceOptions['de'].indexOf(voices[v].voiceURI) !== -1 || voices[v].lang === 'de-DE') {
+      selectedVoices['de'] = v;
+    }
+  }
 
-        console.log(voices)
-        console.log(selectedVoices)
-      };
+  console.log(voices);
+  console.log(selectedVoices);
+};
 
-      // Firebase messages
-      const app = firebase.app();
-      firebase.auth().signInAnonymously().catch(error => { console.log(error); });
-      firebase.auth().onAuthStateChanged(user => { });
-      const db = firebase.firestore(app);
-      db.collection('messages').onSnapshot(function(snapshot) {
+// Firebase messages
+const app = firebase.app();
+firebase.auth().signInAnonymously().catch(error => { console.log(error); });
+firebase.auth().onAuthStateChanged(user => { });
+const db = firebase.firestore(app);
+db.collection('messages').onSnapshot(function(snapshot) {
+  snapshot.docChanges().forEach(function(change) {
+    console.log('change');
+    let now = new Date().getTime();
+    if (change.type === 'added' && now - change.doc.data().ms < 5000) {
+      write(change.doc.data());
+      speak(change.doc.data());
+    }
+  });
+});
 
-        snapshot.docChanges().forEach(function(change) {
-          console.log('change');
-          let now = new Date().getTime();
-          if (change.type === 'added' && now - change.doc.data().ms < 5000) {
-            write(change.doc.data());
-            speak(change.doc.data());
-          }
-        });
-      });
+// Firebase status
+const statusDoc = db.collection('status').doc('lauren');
+statusDoc.onSnapshot((doc) => {
+  setLive(doc.data().live);
+  console.log(`LAUREN is ${doc.data().live ? 'live' : 'not live'}.`);
+});
 
-      // Firebase status
-      let isLive;
-      const statusDoc = db.collection('status').doc('lauren');
-      statusDoc.onSnapshot((doc) => {
-        isLive = doc.data().live;
-        checkUIForToggle();
-        console.log(`LAUREN is ${isLive ? 'live' : 'not live'}.`);
-      });
+// Next performance date
+let dateWrittenEN, dateWrittenDE;
+let nextLang = 'de';
+let langInterval;
+let langIntervalDelay = 10000;
+checkNextPerformance();
 
-      // Next performance date
-      let dateWrittenEN, dateWrittenDE;
-      let nextLang = 'de';
-      let langInterval;
-      let langIntervalDelay = 10000;
-      checkNextPerformance();
+$('#start').click(start);
 
-      $('#start').click(start);
+function start() {
+  $('#start').hide();
+  speak('Hello', 0);
+  $('#write').show();
+}
 
-      function start() {
-        $('#start').hide();
-        speak('Hello', 0);
-        $('#write').show();
+function write(data) {
+  console.log(data);
+  $('#write').html(data.text);
+}
+
+
+function speak(msg, vol) {
+  if (arguments.length === 1) {
+    vol = 1;
+  }
+  let utterance = new SpeechSynthesisUtterance(msg.text);
+  utterance.volume = vol;
+  // utterance.rate = 0.8;
+  let v = selectedVoices[msg.lang];
+  if (v) {
+    utterance.voice = voices[v];
+    utterance.lang = voices[v].lang;
+  }
+  console.log(utterance);
+  speechSynthesis.speak(utterance);
+}
+
+function setLive(isLive) {
+  if (isLive) {
+    $('#start').show();
+    $('#not-live-mode').hide();
+    clearInterval(langInterval);
+    // $('body').css("background-color", "rgb(238, 208, 255)");
+  } else {
+    $('#write').hide();
+    $('#start').hide();
+    $('#not-live-mode').show();
+    nextLang == 'de';
+    clearInterval(langInterval);
+    langInterval = setInterval(switchPerformanceLang, langIntervalDelay);
+    // $('body').css("background-color", "black");
+  }
+}
+
+function checkNextPerformance() {
+  const now = new Date();
+  db.collection('performances')
+    .where('dateUTC', '>', firebase.firestore.Timestamp.fromDate(now))
+    .orderBy('dateUTC', 'asc')
+    .limit(1)
+    .get()
+    .then((querySnapshot) => {
+      if (!querySnapshot.empty) {
+        const nextPerformance = querySnapshot.docs[0].data();
+        console.log("Next Performance:", nextPerformance);
+        ({ dateWrittenEN, dateWrittenDE } = nextPerformance);
+        switchPerformanceLang();
+      } else {
+        console.log("No upcoming performances.");
       }
+    }).catch((error) => {
+      console.error("Error fetching performances: ", error);
+    });
+}
 
-      function write(data) {
-        console.log(data);
-        $('#write').html(data.text);
-      }
-
-
-      function speak(msg, vol) {
-        if (arguments.length === 1) {
-          vol = 1;
-        }
-        const utterance = new SpeechSynthesisUtterance(msg.text);
-        utterance.volume = vol;
-        // utterance.rate = 0.8;
-        if (selectedVoices[msg.lang]) utterance.voice = selectedVoices[msg.lang];
-        speechSynthesis.speak(utterance);
-      }
-
-      function checkUIForToggle() {
-        if (isLive) {
-          $('#start').show();
-          $('#not-live-mode').hide();
-          clearInterval(langInterval);
-          // $('body').css("background-color", "rgb(238, 208, 255)");
-        } else {
-          checkNextPerformance();
-          $('#write').hide();
-          $('#start').hide();
-          $('#not-live-mode').show();
-          nextLang == 'de';
-          // switchPerformanceLang();
-          clearInterval(langInterval);
-          langInterval = setInterval(switchPerformanceLang, langIntervalDelay);
-          // $('body').css("background-color", "black");
-        }
-      }
-
-      function checkNextPerformance() {
-        const now = new Date();
-        db.collection('performances')
-          .where('dateUTC', '>', firebase.firestore.Timestamp.fromDate(now))
-          .orderBy('dateUTC', 'asc')
-          .limit(1)
-          .get()
-          .then((querySnapshot) => {
-            if (!querySnapshot.empty) {
-              const nextPerformance = querySnapshot.docs[0].data();
-              console.log("Next Performance:", nextPerformance);
-              ({ dateWrittenEN, dateWrittenDE } = nextPerformance);
-              switchPerformanceLang();
-            } else {
-              console.log("No upcoming performances.");
-            }
-          }).catch((error) => {
-            console.error("Error fetching performances: ", error);
-          });
-      }
-
-      function switchPerformanceLang() {
-        console.log(`switching next performance language to ${nextLang}!`)
-        if (nextLang == 'en') {
-          $('#next-performance').text(dateWrittenEN);
-          nextLang = 'de';
-        } else {
-          $('#next-performance').text(dateWrittenDE);
-          nextLang = 'en';
-        }
-      }
+function switchPerformanceLang() {
+  console.log(`switching next performance language to ${nextLang}!`)
+  if (nextLang == 'en') {
+    $('#next-performance').text(dateWrittenEN);
+    nextLang = 'de';
+  } else {
+    $('#next-performance').text(dateWrittenDE);
+    nextLang = 'en';
+  }
+}
     </script>
   </body>
 </html>
