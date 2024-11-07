@@ -83,12 +83,14 @@
       let langIntervalDelay = 10000;
       checkNextPerformance();
 
+      let hasStarted = false; // checks for previous start
       $('#start').click(start);
 
       function start() {
         $('#start').hide();
         speak('Hello', 0);
         $('#write').show();
+        hasStarted = true;
       }
 
       function write(data) {
@@ -113,13 +115,22 @@
           utterance.voice = voices[v];
           utterance.lang = voices[v].lang;
         }
-        console.log(utterance);
+        utterance.onerror = (e) => {
+          console.error("Speech synthesis error:", e);
+        };
+        speechSynthesis.cancel();
         speechSynthesis.speak(utterance);
+        console.log(utterance);
       }
 
       function setLive(isLive) {
-        if (isLive) {
+        if (isLive && !hasStarted) { // should show start button on first launch
           $('#start').show();
+          $('#not-live-mode').hide();
+          clearInterval(langInterval);
+        } else if (isLive) { // when turning on live mode, after starting before
+          start();
+          $('#write').empty();
           $('#not-live-mode').hide();
           clearInterval(langInterval);
         } else {
