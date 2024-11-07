@@ -26,9 +26,14 @@ body {
   height: 100%;
 }
 
-#center {
+#center-performer {
   width: 100%;
   margin: 2vw;
+}
+
+#center-pavilion {
+  width: 100%;
+  margin: 4vw;
 }
 
 textarea, select, button, body {
@@ -92,7 +97,12 @@ h1 {
 }
 
 #write {
+  display: flex;
+  align-items: center;   
+  justify-content: center;
   text-align: center;
+  width: 92vw;
+  height: 92vh;
   font-size: 7vw;
   text-transform: uppercase;
 }
