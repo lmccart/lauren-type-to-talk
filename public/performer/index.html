@@ -90,6 +90,7 @@
       }
 
       function send() {
+        $('#current').text('0');
         let msg = $('#msg').val();
         console.log(`send ${msg}`);
         if (msg && msg.length) {
