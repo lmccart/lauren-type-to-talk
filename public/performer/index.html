@@ -76,9 +76,20 @@
       let langInterval;
       let langIntervalDelay = 10000;
 
-      $('textarea').keyup(function() {
-        var characterCount = $(this).val().length;
-        $('#current').text(characterCount);
+      // Calculates character count
+      $('textarea').keyup(function(event) {
+        if (event.key !== 'Enter') { // Sometimes prevents from resetting charCount
+          var characterCount = $(this).val().length;
+          $('#current').text(characterCount);
+        }
+      });
+      
+      // Send on hitting 'Enter'
+      $('textarea').keydown(function(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault(); // Prevents a newline if you don't want one
+          send();
+        }
       });
 
       function init() {
@@ -90,12 +101,12 @@
       }
 
       function send() {
-        $('#current').text('0');
         let msg = $('#msg').val();
         console.log(`send ${msg}`);
         if (msg && msg.length) {
           db.collection('messages').add({text: msg, lang: $('#lang').find(":selected").val(), ts: firebase.firestore.FieldValue.serverTimestamp(), ms: new Date().getTime()}).then(() => {
             $('#msg').val("");
+            $('#current').text('0');
           });
         }
       }
