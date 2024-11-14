@@ -40,11 +40,21 @@
           'de': ['Anna']
         };
         voices = window.speechSynthesis.getVoices();
+
+        // Checking for localService voices, they can perform locally without an endpoint!
+        // This can be adapted for future languages
+        // const localGermanVoices = voices.filter(voice => voice.lang === 'de-DE' && voice.localService);
+        // if (localGermanVoices.length > 0) {
+        //   console.log("Local German voices:", localGermanVoices);
+        // } else {
+        //   console.log("No local German voices available.");
+        // }
+
         for (let v in voices) {
           if (voiceOptions['en'].indexOf(voices[v].voiceURI) !== -1) {
             selectedVoices['en'] = v;
           }
-          if (voiceOptions['de'].indexOf(voices[v].voiceURI) !== -1 || voices[v].lang === 'de-DE') {
+          if (voiceOptions['de'].indexOf(voices[v].voiceURI) !== -1 && voices[v].lang === 'de-DE' && voices[v].localService) {
             selectedVoices['de'] = v;
           }
         }
@@ -118,9 +128,11 @@
         utterance.onerror = (e) => {
           console.error("Speech synthesis error:", e);
         };
-        speechSynthesis.cancel();
-        speechSynthesis.speak(utterance);
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
         console.log(utterance);
+        console.log(speechSynthesis);
+        console.log(utterance.voice, utterance.lang);
       }
 
       function setLive(isLive) {
