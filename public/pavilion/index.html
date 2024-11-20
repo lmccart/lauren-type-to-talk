@@ -82,6 +82,7 @@
       // Firebase status
       const statusDoc = db.collection('status').doc('lauren');
       statusDoc.onSnapshot((doc) => {
+        checkNextPerformance();
         setLive(doc.data().live);
         console.log(`LAUREN is ${doc.data().live ? 'live' : 'not live'}.`);
       });
@@ -91,7 +92,6 @@
       let nextLang = 'de';
       let langInterval;
       let langIntervalDelay = 10000;
-      checkNextPerformance();
 
       let hasStarted = false; // checks for previous start
       $('#start').click(start);
