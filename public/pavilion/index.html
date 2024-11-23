@@ -41,20 +41,38 @@
         };
         voices = window.speechSynthesis.getVoices();
 
+        // Katja Stefan Hedda German (Germany)
+
         // Checking for localService voices, they can perform locally without an endpoint!
         // This can be adapted for future languages
-        // const localGermanVoices = voices.filter(voice => voice.lang === 'de-DE' && voice.localService);
-        // if (localGermanVoices.length > 0) {
-        //   console.log("Local German voices:", localGermanVoices);
-        // } else {
-        //   console.log("No local German voices available.");
+        const localEnglishVoices = voices.filter(voice => voice.lang === 'en-US' && voice.localService);
+        if (localEnglishVoices.length > 0) {
+          console.log("Local English voices:", localEnglishVoices);
+        } else {
+          console.log("No local English voices available.");
+        }
+
+        const localGermanVoices = voices.filter(voice => voice.lang === 'de-DE' && voice.localService);
+        if (localGermanVoices.length > 0) {
+          console.log("Local German voices:", localGermanVoices);
+        } else {
+          console.log("No local German voices available.");
+        }
+
+        // for (let v in voices) {
+        //   if (voiceOptions['en'].indexOf(voices[v].voiceURI) !== -1) {
+        //     selectedVoices['en'] = v;
+        //   }
+        //   if (voiceOptions['de'].indexOf(voices[v].voiceURI) !== -1 && voices[v].lang === 'de-DE' && voices[v].localService) {
+        //     selectedVoices['de'] = v;
+        //   }
         // }
 
         for (let v in voices) {
-          if (voiceOptions['en'].indexOf(voices[v].voiceURI) !== -1) {
+          if (voices[v].lang === 'en-US' && voices[v].localService) {
             selectedVoices['en'] = v;
           }
-          if (voiceOptions['de'].indexOf(voices[v].voiceURI) !== -1 && voices[v].lang === 'de-DE' && voices[v].localService) {
+          if (voices[v].lang === 'de-DE' && voices[v].localService) {
             selectedVoices['de'] = v;
           }
         }
