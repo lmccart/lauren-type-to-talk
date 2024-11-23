@@ -36,19 +36,19 @@
 
       window.speechSynthesis.onvoiceschanged = function() {
         let voiceOptions = {
-          'en': ['Vicki', 'Samantha', 'Allison', 'Ava'],
-          'de': ['Anna']
+          'en': ['Microsoft Zira - English (United States)', 'Vicki', 'Samantha', 'Allison', 'Ava'],
+          'de': ['Microsoft Katja - German (Germany)', 'Anna']
         };
         voices = window.speechSynthesis.getVoices();
 
         // Checking for localService voices, they can perform locally without an endpoint!
         // This can be adapted for future languages
-        // const localGermanVoices = voices.filter(voice => voice.lang === 'de-DE' && voice.localService);
-        // if (localGermanVoices.length > 0) {
-        //   console.log("Local German voices:", localGermanVoices);
-        // } else {
-        //   console.log("No local German voices available.");
-        // }
+        const localGermanVoices = voices.filter(voice => voice.lang === 'de-DE' && voice.localService);
+        if (localGermanVoices.length > 0) {
+          console.log("Local German voices:", localGermanVoices);
+        } else {
+          console.log("No local German voices available.");
+        }
 
         for (let v in voices) {
           if (voiceOptions['en'].indexOf(voices[v].voiceURI) !== -1) {
@@ -187,6 +187,6 @@
           nextLang = 'en';
         }
       }
-    </script>
+      </script>
   </body>
 </html>
