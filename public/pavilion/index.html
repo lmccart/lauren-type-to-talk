@@ -25,7 +25,9 @@
           <div id="not-live-mode" style="display:none">
             <div id="next-performance">The next performance will be soon!</div>
           </div>
-          <button id="start">start</button>
+          <div id="start">
+            <button id="start-button">start</button>
+          </div>
         </div>
       </div>
 
@@ -80,10 +82,12 @@
       });
 
       // Firebase status
+      let isLive;
       const statusDoc = db.collection('status').doc('lauren');
       statusDoc.onSnapshot((doc) => {
         checkNextPerformance();
-        setLive(doc.data().live);
+        isLive = doc.data().live;
+        setLive();
         console.log(`LAUREN is ${doc.data().live ? 'live' : 'not live'}.`);
       });
 
@@ -95,12 +99,12 @@
       checkNextPerformance();
 
       let hasStarted = false; // checks for previous start
-      $('#start').click(start);
+      $('#start-button').click(start);
 
       function start() {
         $('#start').hide();
         speak('Hello', 0);
-        $('#write').show();
+        if (isLive) $('#write').show(); // only if live
         hasStarted = true;
       }
 
@@ -136,19 +140,26 @@
         console.log(utterance.voice, utterance.lang);
       }
 
-      function setLive(isLive) {
-        if (isLive && !hasStarted) { // should show start button on first launch
+      function setLive() {
+        if (isLive && !hasStarted) { // live mode, but not started yet (on load/refresh)
           $('#start').show();
           $('#not-live-mode').hide();
           clearInterval(langInterval);
-        } else if (isLive) { // when turning on live mode, after starting before
+        } else if (isLive && hasStarted) { // when turning on live mode, after starting before
           start();
           $('#write').empty();
           $('#not-live-mode').hide();
           clearInterval(langInterval);
-        } else {
-          $('#write').hide();
+        } else if (!isLive && hasStarted) { // notLive mdoe, but has started before
           $('#start').hide();
+          $('#write').hide();
+          $('#not-live-mode').show();
+          nextLang == 'de';
+          clearInterval(langInterval);
+          langInterval = setInterval(switchPerformanceLang, langIntervalDelay);
+        } else { // !isLive && !hasStarted
+          $('#start').show();
+          $('#write').hide();
           $('#not-live-mode').show();
           nextLang == 'de';
           clearInterval(langInterval);

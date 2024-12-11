@@ -88,6 +88,19 @@ h1 {
   color: rgb(219, 167, 250);
 }
 
+#start {
+  position: fixed; 
+  top: 0;
+  left: 0;     
+  width: 100vw;
+  height: 100vh;
+  background: rgb(223, 165, 255);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
 #lang {
   margin-bottom: 2.5vw;
 }
