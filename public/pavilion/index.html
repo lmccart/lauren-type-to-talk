@@ -110,11 +110,13 @@
 
       function write(data) {
         console.log(data);
-        $('#write').html(data.text);
-        $('#write').fancyTextFill({ // will need to adjust these values depending on screen
+        setTimeout(() => {
+          $('#write').html(data.text);
+          $('#write').fancyTextFill({ // will need to adjust these values depending on screen
           minFontSize: 100,
           maxFontSize: 1000
         });
+        }, 1750);
       }
 
       async function speak(msg, vol) {
