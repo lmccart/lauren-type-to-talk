@@ -103,7 +103,7 @@
 
       function start() {
         $('#start').hide();
-        speak('Hello', 0);
+        speak({ text: 'Hello' }, 0);
         if (isLive) $('#write').show(); // only if live
         hasStarted = true;
       }
@@ -115,30 +115,57 @@
           minFontSize: 100,
           maxFontSize: 1000
         });
-
       }
 
-      function speak(msg, vol) {
-        if (arguments.length === 1) {
-          vol = 1;
+      async function speak(msg, vol) {
+        const voice = "Sarah";
+        const url = `https://what-to-say.xyz/synthesize?text=${encodeURIComponent(msg.text)}&voice=${encodeURIComponent(voice)}`;
+
+        try {
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          // Create an Audio object to play the response
+          const audioBlob = await response.blob();
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audio = new Audio(audioUrl);
+          audio.play();
+          console.log("Audio generated and playing...");
+        } else {
+          console.error("Failed to generate audio.");
         }
-        let utterance = new SpeechSynthesisUtterance(msg.text);
-        utterance.volume = vol;
-        // utterance.rate = 0.8;
-        let v = selectedVoices[msg.lang];
-        if (v) {
-          utterance.voice = voices[v];
-          utterance.lang = voices[v].lang;
-        }
-        utterance.onerror = (e) => {
-          console.error("Speech synthesis error:", e);
-        };
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(utterance);
-        console.log(utterance);
-        console.log(speechSynthesis);
-        console.log(utterance.voice, utterance.lang);
+      } catch (error) {
+        console.error("Error:", error);
       }
+    }
+
+      /////// browser synthesis version
+      // function speak(msg, vol) {
+      //   if (arguments.length === 1) {
+      //     vol = 1;
+      //   }
+      //   let utterance = new SpeechSynthesisUtterance(msg.text);
+      //   utterance.volume = vol;
+      //   // utterance.rate = 0.8;
+      //   let v = selectedVoices[msg.lang];
+      //   if (v) {
+      //     utterance.voice = voices[v];
+      //     utterance.lang = voices[v].lang;
+      //   }
+      //   utterance.onerror = (e) => {
+      //     console.error("Speech synthesis error:", e);
+      //   };
+      //   window.speechSynthesis.cancel();
+      //   window.speechSynthesis.speak(utterance);
+      //   console.log(utterance);
+      //   console.log(speechSynthesis);
+      //   console.log(utterance.voice, utterance.lang);
+      // }
 
       function setLive() {
         if (isLive && !hasStarted) { // live mode, but not started yet (on load/refresh)
