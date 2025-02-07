@@ -96,8 +96,8 @@
       });
 
       // Next performance date
-      let dateWrittenEN, dateWrittenDE;
-      let nextLang = 'de';
+      let dateWrittenL0, dateWrittenL1;
+      let nextLang = 'L1';
       let langInterval;
       let langIntervalDelay = 10000;
       checkNextPerformance();
@@ -158,14 +158,14 @@
           $('#start').hide();
           $('#write').hide();
           $('#not-live-mode').show();
-          nextLang == 'de';
+          nextLang == 'L1';
           clearInterval(langInterval);
           langInterval = setInterval(switchPerformanceLang, langIntervalDelay);
         } else { // !isLive && !hasStarted
           $('#start').show();
           $('#write').hide();
           $('#not-live-mode').show();
-          nextLang == 'de';
+          nextLang == 'L1';
           clearInterval(langInterval);
           langInterval = setInterval(switchPerformanceLang, langIntervalDelay);
         }
@@ -182,7 +182,7 @@
             if (!querySnapshot.empty) {
               const nextPerformance = querySnapshot.docs[0].data();
               console.log("Next Performance:", nextPerformance);
-              ({ dateWrittenEN, dateWrittenDE } = nextPerformance);
+              ({ dateWrittenL0, dateWrittenL1 } = nextPerformance);
               switchPerformanceLang();
             } else {
               console.log("No upcoming performances.");
@@ -194,12 +194,12 @@
 
       function switchPerformanceLang() {
         console.log(`switching next performance language to ${nextLang}!`)
-        if (nextLang == 'en') {
-          $('#next-performance').text(dateWrittenEN);
-          nextLang = 'de';
+        if (nextLang == 'L0') {
+          $('#next-performance').text(dateWrittenL0);
+          nextLang = 'L1';
         } else {
-          $('#next-performance').text(dateWrittenDE);
-          nextLang = 'en';
+          $('#next-performance').text(dateWrittenL1);
+          nextLang = 'L0';
         }
       }
       </script>
