@@ -1,41 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>LAUREN</title>
-    <link rel="shortcut icon" type="image/jpg" href="../favicon.ico"/>
+    <link rel="shortcut icon" type="image/jpg" href="../favicon.ico" />
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-    <script  src="/__/firebase/9.17.1/firebase-app-compat.js"></script>
-    <script  src="/__/firebase/9.17.1/firebase-auth-compat.js"></script>
-    <script  src="/__/firebase/9.17.1/firebase-firestore-compat.js"></script>
-    <script  src="/__/firebase/9.17.1/firebase-storage-compat.js"></script>
-    <script  src="/__/firebase/9.17.1/firebase-performance-compat.js"></script>
-    <script  src="/__/firebase/init.js?useEmulator=true"></script>
-    <link rel="stylesheet" href="../style.css">
-
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <script src="/__/firebase/9.17.1/firebase-app-compat.js"></script>
+    <script src="/__/firebase/9.17.1/firebase-auth-compat.js"></script>
+    <script src="/__/firebase/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="/__/firebase/9.17.1/firebase-storage-compat.js"></script>
+    <script src="/__/firebase/9.17.1/firebase-performance-compat.js"></script>
+    <script src="/__/firebase/init.js?useEmulator=true"></script>
+    <link rel="stylesheet" href="../style.css" />
   </head>
   <body>
     <header>
-      <h1>&nbsp;LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home?</h1>
+      <h1>
+        &nbsp;LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home?
+        LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN:
+        Anyone Home? LAUREN: Anyone Home?
+      </h1>
     </header>
 
     <div id="container">
       <div id="center-performer">
-          
         <div id="live-mode">
           Language:
           <select id="lang" name="lang">
             <option value="en" selected>English</option>
             <option value="el">Ελληνικά</option>
           </select>
-          <textarea type="text" id="msg" placeholder="Type to speak..." rows="3" maxlength="75"></textarea>
+          <textarea
+            type="text"
+            id="msg"
+            placeholder="Type to speak..."
+            rows="3"
+            maxlength="75"
+          ></textarea>
           <div id="max-char-count">
             <span id="current">0</span>
             <span id="maximum">/ 75</span>
           </div>
-  
+
           <button id="send">Send</button>
         </div>
 
@@ -43,50 +58,56 @@
           <p id="next-performance">The next performance will be soon!</p>
         </div>
 
-        
-    
         <footer>
-          <h1>&nbsp;LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home?</h1>
+          <h1>
+            &nbsp;LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home?
+            LAUREN: Anyone Home? LAUREN: Anyone Home? LAUREN: Anyone Home?
+            LAUREN: Anyone Home? LAUREN: Anyone Home?
+          </h1>
         </footer>
       </div>
       <button id="live">Live</button>
-      
     </div>
-   
 
     <script>
       const app = firebase.app();
-      firebase.auth().signInAnonymously().catch(error => { console.log(error); });
-      firebase.auth().onAuthStateChanged(user => { 
+      firebase
+        .auth()
+        .signInAnonymously()
+        .catch((error) => {
+          console.log(error);
+        });
+      firebase.auth().onAuthStateChanged((user) => {
         init();
       });
       const db = firebase.firestore(app);
 
       // Check for Live mode
       let isLive;
-      const statusDoc = db.collection('status').doc('lauren');
+      const statusDoc = db.collection("status").doc("lauren");
       statusDoc.onSnapshot((doc) => {
         isLive = doc.data().live;
         checkUIForToggle();
-        console.log(`LAUREN is ${isLive ? 'live' : 'not live'}.`);
-      })
+        console.log(`LAUREN is ${isLive ? "live" : "not live"}.`);
+      });
 
       let dateWrittenL0, dateWrittenL1;
-      let nextLang = 'L1';
+      let nextLang = "L1";
       let langInterval;
       let langIntervalDelay = 10000;
 
       // Calculates character count
-      $('textarea').keyup(function(event) {
-        if (event.key !== 'Enter') { // Sometimes prevents from resetting charCount
+      $("textarea").keyup(function (event) {
+        if (event.key !== "Enter") {
+          // Sometimes prevents from resetting charCount
           var characterCount = $(this).val().length;
-          $('#current').text(characterCount);
+          $("#current").text(characterCount);
         }
       });
-      
+
       // Send on hitting 'Enter'
-      $('textarea').keydown(function(event) {
-        if (event.key === 'Enter') {
+      $("textarea").keydown(function (event) {
+        if (event.key === "Enter") {
           event.preventDefault(); // Prevents a newline if you don't want one
           send();
         }
@@ -94,45 +115,55 @@
 
       function init() {
         // Attach functionality to buttons
-        $('#send').click(send);
-        $('#live').click(toggleLive);
+        $("#send").click(send);
+        $("#live").click(toggleLive);
 
         checkNextPeformance();
       }
 
       function send() {
-        let msg = $('#msg').val();
+        let msg = $("#msg").val();
         console.log(`send ${msg}`);
         if (msg && msg.length) {
-          db.collection('messages').add({text: msg, lang: $('#lang').find(":selected").val(), ts: firebase.firestore.FieldValue.serverTimestamp(), ms: new Date().getTime()}).then(() => {
-            $('#msg').val("");
-            $('#current').text('0');
-          });
+          db.collection("messages")
+            .add({
+              text: msg,
+              lang: $("#lang").find(":selected").val(),
+              ts: firebase.firestore.FieldValue.serverTimestamp(),
+              ms: new Date().getTime(),
+            })
+            .then(() => {
+              $("#msg").val("");
+              $("#current").text("0");
+            });
         }
       }
 
       function toggleLive() {
         statusDoc.get().then((doc) => {
           isLive = doc.data().live;
-          statusDoc.update({
-            live: !isLive
-          }).then().catch((error) => {
-            console.error("Error updating document: ", error);
-          });
-        })
+          statusDoc
+            .update({
+              live: !isLive,
+            })
+            .then()
+            .catch((error) => {
+              console.error("Error updating document: ", error);
+            });
+        });
       }
 
       function checkUIForToggle() {
         if (isLive) {
-          $('#live-mode').show();
-          $('#not-live-mode').hide();
-          $('#live').text("Live");
+          $("#live-mode").show();
+          $("#not-live-mode").hide();
+          $("#live").text("Live");
           clearInterval(langInterval);
         } else {
-          $('#live-mode').hide();
-          $('#not-live-mode').show();
-          $('#live').text("Not Live");
-          nextLang == 'L1';
+          $("#live-mode").hide();
+          $("#not-live-mode").show();
+          $("#live").text("Not Live");
+          nextLang == "L1";
           // switchPerformanceLang();
           clearInterval(langInterval);
           langInterval = setInterval(switchPerformanceLang, langIntervalDelay);
@@ -152,9 +183,9 @@
 
       function checkNextPeformance() {
         const now = new Date();
-        db.collection('performances')
-          .where('dateUTC', '>', firebase.firestore.Timestamp.fromDate(now))
-          .orderBy('dateUTC', 'asc')
+        db.collection("performances")
+          .where("dateUTC", ">", firebase.firestore.Timestamp.fromDate(now))
+          .orderBy("dateUTC", "asc")
           .limit(1)
           .get()
           .then((querySnapshot) => {
@@ -166,22 +197,22 @@
             } else {
               console.log("No upcoming performances.");
             }
-          }).catch((error) => {
+          })
+          .catch((error) => {
             console.error("Error fetching performances: ", error);
           });
       }
 
       function switchPerformanceLang() {
-        console.log(`switching next performance language to ${nextLang}!`)
-        if (nextLang == 'L0') {
-          $('#next-performance').text(dateWrittenL0);
-          nextLang = 'L1';
+        console.log(`switching next performance language to ${nextLang}!`);
+        if (nextLang == "L0") {
+          $("#next-performance").text(dateWrittenL0);
+          nextLang = "L1";
         } else {
-          $('#next-performance').text(dateWrittenL1);
-          nextLang = 'L0';
+          $("#next-performance").text(dateWrittenL1);
+          nextLang = "L0";
         }
       }
-
     </script>
   </body>
 </html>
