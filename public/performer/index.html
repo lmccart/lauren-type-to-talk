@@ -145,7 +145,7 @@
         openColorpicker();
       }
 
-      let newColor;
+      let newHex, newRGB;
 
       // Calculates character count
       $("textarea").keyup(function (event) {
@@ -280,7 +280,8 @@
           $("#color-mode-button").css("color", "white");
         } else {
           interactionMode = "color";
-          newColor = null;
+          newHex = null;
+          newRGB = null;
           // $("#choose-mode").text("Color");
           $("#text-mode").hide();
           openColorpicker();
@@ -340,7 +341,7 @@
         });
 
         $("#send-color-button").click(function () {
-          if (newColor) sendColor(newColor);
+          if (newRGB) sendColor(newRGB);
         });
       }
 
@@ -351,9 +352,10 @@
         } else {
           var ctx = colorWheel.getContext("2d");
           var data = ctx.getImageData(arg.offsetX, arg.offsetY, 1, 1);
-          hex = RGBToHex(data.data.slice(0, 3));
+          newRGB = data.data.slice(0, 3);
+          hex = RGBToHex(newRGB);
         }
-        newColor = hex;
+        newHex = hex;
         // let hsl = HexToHSL(hex);
       }
 
