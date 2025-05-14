@@ -34,24 +34,45 @@
     <div id="container">
       <div id="center-performer">
         <div id="live-mode">
-          Language:
-          <select id="lang" name="lang">
-            <option value="en" selected>English</option>
-            <option value="el">Ελληνικά</option>
-          </select>
-          <textarea
-            type="text"
-            id="msg"
-            placeholder="Type to speak..."
-            rows="3"
-            maxlength="75"
-          ></textarea>
-          <div id="max-char-count">
-            <span id="current">0</span>
-            <span id="maximum">/ 75</span>
+          <div id="text-mode">
+            <div class="text-intro">
+              Language:
+              <select id="lang" name="lang">
+                <option value="en" selected>English</option>
+                <option value="el">Ελληνικά</option>
+              </select>
+            </div>
+            <textarea
+              type="text"
+              id="msg"
+              placeholder="Type to speak..."
+              rows="3"
+              maxlength="75"
+            ></textarea>
+            <div id="max-char-count">
+              <span id="current">0</span>
+              <span id="maximum">/ 75</span>
+            </div>
+            <button id="send">Send</button>
           </div>
-
-          <button id="send">Send</button>
+          <div id="color-mode">
+            <div id="color-text-intro" class="text-intro">
+              Select color and click SET
+            </div>
+            <div id="colorpicker-widget" class="widget" style="display: none">
+              <img
+                id="colorwheel"
+                src="./colorwheel.png"
+                style="display: none"
+              />
+              <img
+                id="colormarker"
+                src="./marker-white.png"
+                style="display: none"
+              />
+            </div>
+            <button id="send-color-button">Set</button>
+          </div>
         </div>
 
         <div id="not-live-mode">
@@ -66,7 +87,21 @@
           </h1>
         </footer>
       </div>
-      <button id="live">Live</button>
+      <div id="interface-button-container">
+        <button
+          id="color-mode-button"
+          class="interface-button interaction-button"
+        >
+          Light
+        </button>
+        <button
+          id="text-mode-button"
+          class="interface-button interaction-button"
+        >
+          Speak
+        </button>
+        <button id="live" class="interface-button">Live</button>
+      </div>
     </div>
 
     <script>
@@ -96,6 +131,22 @@
       let langInterval;
       let langIntervalDelay = 10000;
 
+      let interactionMode = "color"; // "text" or "color"
+
+      if (interactionMode === "text") {
+        $("#color-mode").hide();
+        $("#text-mode-button").css("rgb(211, 128, 255)");
+        $("#color-mode-button").css("color", "white");
+      } else {
+        $("#text-mode").hide();
+        $("#text-mode-button").css("color", "white");
+        $("#color-mode-button").css("color", "rgb(211, 128, 255)");
+        initializeColorWheel();
+        openColorpicker();
+      }
+
+      let newColor;
+
       // Calculates character count
       $("textarea").keyup(function (event) {
         if (event.key !== "Enter") {
@@ -117,7 +168,8 @@
         // Attach functionality to buttons
         $("#send").click(send);
         $("#live").click(toggleLive);
-
+        $("#color-mode-button").click(() => setInteraction("color"));
+        $("#text-mode-button").click(() => setInteraction("text"));
         checkNextPeformance();
       }
 
@@ -157,10 +209,13 @@
         if (isLive) {
           $("#live-mode").show();
           $("#not-live-mode").hide();
+          $(".interaction-button").show();
           $("#live").text("Live");
+          $(".interaction-button").show();
           clearInterval(langInterval);
         } else {
           $("#live-mode").hide();
+          $(".interaction-button").hide();
           $("#not-live-mode").show();
           $("#live").text("Not Live");
           nextLang == "L1";
@@ -212,6 +267,119 @@
           $("#next-performance").text(dateWrittenL1);
           nextLang = "L0";
         }
+      }
+
+      function setInteraction(mode) {
+        console.log(`setting interaction to ${mode}`);
+        if (mode === "text") {
+          interactionMode = "text";
+          // $("#choose-mode").text("Text");
+          $("#color-mode").hide();
+          $("#text-mode").show();
+          $("#text-mode-button").css("color", "rgb(211, 128, 255)");
+          $("#color-mode-button").css("color", "white");
+        } else {
+          interactionMode = "color";
+          newColor = null;
+          // $("#choose-mode").text("Color");
+          $("#text-mode").hide();
+          openColorpicker();
+          $("#color-mode").show();
+          $("#text-mode-button").css("color", "white");
+          $("#color-mode-button").css("color", "rgb(211, 128, 255)");
+        }
+      }
+
+      function generateColorWheel(size, centerColor) {
+        if (size === void 0) {
+          size = 400;
+        }
+        if (centerColor === void 0) {
+          centerColor = "white";
+        }
+
+        var canvas = document.createElement("canvas"); //Generate main canvas to return
+        canvas.id = "colorpicker-canvas";
+        var ctx = canvas.getContext("2d");
+        canvas.width = canvas.height = size;
+        ctx.drawImage(
+          $("#colorwheel").get(0),
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+        return canvas; //return main canvas
+      }
+
+      function initializeColorWheel() {
+        colorWheel = generateColorWheel(600);
+        //Add color wheel canvas to document
+        $("#colorpicker-widget").append(colorWheel);
+        $("#colorpicker-canvas").mousemove(function (e) {
+          if (e.which === 1) {
+            updateColor(e);
+          }
+        });
+
+        $("#colorpicker-canvas").mousedown(function (e) {
+          $("#colorpicker-canvas").css(
+            "cursor",
+            "url(./marker-white.png) 13 13, auto"
+          );
+          $("#colormarker").hide();
+        });
+
+        $("#colorpicker-canvas").mouseup(function (e) {
+          $("#colorpicker-canvas").css("cursor", "default");
+          $("#colormarker").show();
+          var off = $("#colorpicker-canvas").offset();
+          $("#colormarker").css("top", e.offsetY + off.top - 13);
+          $("#colormarker").css("left", e.offsetX + off.left - 13);
+          updateColor(e);
+        });
+
+        $("#send-color-button").click(function () {
+          if (newColor) sendColor(newColor);
+        });
+      }
+
+      function updateColor(arg) {
+        let hex;
+        if (typeof arg === "string") {
+          hex = arg;
+        } else {
+          var ctx = colorWheel.getContext("2d");
+          var data = ctx.getImageData(arg.offsetX, arg.offsetY, 1, 1);
+          hex = RGBToHex(data.data.slice(0, 3));
+        }
+        newColor = hex;
+        // let hsl = HexToHSL(hex);
+      }
+
+      function sendColor(color) {
+        console.log(`changing lights to ${color}`);
+        // here we'll send to the server
+      }
+
+      function openColorpicker(id, hex, name) {
+        $("#colormarker").hide();
+        $("#colorpicker-widget").show();
+      }
+
+      function RGBToHex(rgb) {
+        var r = Math.round(rgb[0]);
+        var g = Math.round(rgb[1]);
+        var b = Math.round(rgb[2]);
+        return (
+          "#" +
+          (r < 16 ? "0" : "") +
+          r.toString(16) +
+          (g < 16 ? "0" : "") +
+          g.toString(16) +
+          (b < 16 ? "0" : "") +
+          b.toString(16)
+        );
       }
     </script>
   </body>

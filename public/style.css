@@ -36,6 +36,10 @@ body {
   margin: 4vw;
 }
 
+#text-mode {
+  padding: 0 2vw 0 2vw;
+}
+
 textarea, select, button, body {
   font-size: 3vw;
   font-family: 'InputMono';
@@ -51,11 +55,9 @@ textarea {
   box-sizing: border-box;
 }
 
-
 textarea::placeholder {
   color:  rgb(211, 128, 255);
 }
-
 
 textarea, select, button {
   background: none;
@@ -124,17 +126,63 @@ h1 {
   float: right;
 }
 
-#live {
-  position: fixed;
-  right: 2vw;
-  bottom: 2vw;
-  border: none;
-}
-
 #next-performance {
   text-align: center;
   text-transform: uppercase;
   font-size: 7vw;
+}
+
+button.interface-button {
+  border: none;
+}
+
+button.interface-button:hover {
+  /* no background change, just darker text */
+  background: rgb(223, 165, 255); 
+  color: rgb(211, 128, 255) !important;
+}
+
+#interface-button-container {
+  position: fixed;
+  right: 2vw;
+  bottom: 2vw;
+}
+
+.text-intro {
+  padding-left: 2vw;
+}
+
+#color-text-intro {
+  position: absolute;
+  top: 4vw;
+  left: 4vw;
+}
+
+.widget {
+  top: 0;
+  left: 0;
+  height: 100%;
+  z-index: 3;
+}
+
+#colorpicker-canvas {
+  position: relative;
+  left: calc(46vw - 300px);
+}
+
+#colormarker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 25px;
+  height: 25px;
+  z-index: 2;
+}
+
+#send-color-button {
+  position: absolute;
+  left: 4vw;
+  bottom: 4vw;
 }
 
 header, footer {
